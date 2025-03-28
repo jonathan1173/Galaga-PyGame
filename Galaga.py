@@ -21,12 +21,12 @@ class Naves:
         self.y = y
         self.velocidad = velocidad
         self.vida = vida
-        self.daño = daño
+        self.daño = daño  
         self.jugador = jugador
         self.ultimo_disparo = 0
 
-    def muerte(self):
-        self.vida -= self.daño
+    def muerte(self, daño_recibido):
+        self.vida -= daño_recibido  
         if self.vida <= 0:
             if self.jugador:
                 print("Has sido destruido")
@@ -44,9 +44,9 @@ class Naves:
         tiempo_actual = time.time()
         if tiempo_actual - self.ultimo_disparo >= frecuencia_disparo:
             if self.jugador:
-                balas.append(Balas(self.x + 18, self.y, 5, 1, jugador=True))  
+                balas.append(Balas(self.x + 18, self.y, 5, self.daño, jugador=True))  
             else:
-                balas.append(Balas(self.x + 18, self.y + 40, 5, 1, jugador=False))  
+                balas.append(Balas(self.x + 18, self.y + 40, 5, self.daño, jugador=False))  
             self.ultimo_disparo = tiempo_actual
 
 class Balas:
@@ -54,7 +54,7 @@ class Balas:
         self.x = x
         self.y = y
         self.velocidad = velocidad
-        self.daño = daño
+        self.daño = daño  
         self.jugador = jugador  
 
     def mover(self, pantalla):
@@ -86,10 +86,10 @@ def formacion_enemigos_piramide():
             pos_x = j * (30 + 20)
             pos_y = 50 + i * (30 + 20)
             margen = ANCHO_PANTALLA // 2 - (filas - i) * (30 + 20) // 2
-            enemigos.append(Enemigo(pos_x + margen, pos_y, 1, 2, 1))
+            enemigos.append(Enemigo(pos_x + margen, pos_y, 1, 2, 1))  
     return enemigos
 
-jugador = Jugador(230, 400, 5, 3, 1)
+jugador = Jugador(230, 400, 5, 3, 2) 
 enemigos = formacion_enemigos_piramide()
 
 ejecutando = True
@@ -108,6 +108,10 @@ while ejecutando:
     for enemigo in enemigos[:]:
         enemigo.dibujar(pantalla)
         enemigo.disparar(frecuencia_disparo=2)
+
+    if not enemigos:
+        print("¡Has ganado! No quedan enemigos.")
+        ejecutando = False  
         
     for bala in balas[:]:
         bala.mover(pantalla)
@@ -117,14 +121,14 @@ while ejecutando:
             if bala.jugador:  
                 for enemigo in enemigos[:]:
                     if enemigo.x < bala.x < enemigo.x + 40 and enemigo.y < bala.y < enemigo.y + 40:
-                        if enemigo.muerte():
+                        if enemigo.muerte(bala.daño):  
                             enemigos.remove(enemigo)
-                            balas.remove(bala)       
+                        balas.remove(bala)       
             else:
                 if jugador.x < bala.x < jugador.x + 40 and jugador.y < bala.y < jugador.y + 40:
-                    if jugador.muerte():
-                        balas.remove(bala)
-                        ejecutando = False
+                    if jugador.muerte(bala.daño):  
+                        ejecutando = False  
+                    balas.remove(bala)  
                
     pygame.display.flip()
     pygame.time.delay(30)
