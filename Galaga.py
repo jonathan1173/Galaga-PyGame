@@ -55,7 +55,7 @@ class Balas:
         self.y = y
         self.velocidad = velocidad
         self.daño = daño
-        self.jugador = jugador  # Se corrige la asignación correcta
+        self.jugador = jugador  
 
     def mover(self, pantalla):
         if self.jugador:
@@ -107,26 +107,25 @@ while ejecutando:
     
     for enemigo in enemigos[:]:
         enemigo.dibujar(pantalla)
-        # enemigo.disparar(frecuencia_disparo=2)
+        enemigo.disparar(frecuencia_disparo=2)
         
     for bala in balas[:]:
         bala.mover(pantalla)
         if bala.y < 0 or bala.y > ALTO_PANTALLA:  
             balas.remove(bala)
         else:
-            if bala.jugador:  # Se corrige la referencia incorrecta
+            if bala.jugador:  
                 for enemigo in enemigos[:]:
                     if enemigo.x < bala.x < enemigo.x + 40 and enemigo.y < bala.y < enemigo.y + 40:
                         if enemigo.muerte():
                             enemigos.remove(enemigo)
-                        try:
-                            balas.remove(bala)
-                        except ValueError:
-                            pass
+                            balas.remove(bala)       
             else:
-                # Placeholder: implementar colisión de bala enemiga con el jugador
-                pass
-
+                if jugador.x < bala.x < jugador.x + 40 and jugador.y < bala.y < jugador.y + 40:
+                    if jugador.muerte():
+                        balas.remove(bala)
+                        ejecutando = False
+               
     pygame.display.flip()
     pygame.time.delay(30)
 
