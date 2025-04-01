@@ -1,17 +1,17 @@
 import math
+import pandas as pd
 
 # corriente de dipolos
-corriente = [1.41,0.242,0.0418,7.2e-3,1.24e-3,2.13e-4]
+corriente = [1.41, 0.242, 0.0418, 7.2e-3, 1.24e-3, 2.13e-4]
 
 # distancia entre dipolos 
-distancia = [0,0.53,0.46,0.39,0.34,0.28]
+distancia = [0, 0.53, 0.46, 0.39, 0.34, 0.28]
 
-# numero de onda 
-b=1.84
+# número de onda
+b = 1.84
 
-# angulos en grados
-# modificar el numero para poner mas grados 
-angulos = range(50)
+# ángulos en grados (puedes modificar para más ángulos)
+angulos = range(20)
 
 def sin_deg(angle_deg):
     """Seno en grados"""
@@ -25,49 +25,46 @@ def tan_deg(angle_deg):
     """Tangente en grados"""
     return math.tan(math.radians(angle_deg))
 
-
-def fn(angulo_rad) :
-    
-    interior = cos_deg(angulo_rad) if cos_deg(angulo_rad) != 0 else 0
+def fn(angulo):
+    """
+    Calcula la función auxiliar fn para un ángulo dado en grados.
+    """
+    interior = cos_deg(angulo) if cos_deg(angulo) != 0 else 0
     interior2 = (math.pi / 2) * interior
     numerador = cos_deg(interior2) if cos_deg(interior2) != 0 else 0
-    denominador = sin_deg(angulo_rad) if sin_deg(angulo_rad) != 0 else 0
+    denominador = sin_deg(angulo) if sin_deg(angulo) != 0 else 0
     
     if denominador == 0:
         return 0
-    
     return numerador / denominador
 
-# # Ejemplo de uso:
-# parametros de la funcion: grados 
-#resultado = fn(30)
-#print(f"Resultado de fn(30): {resultado}")
-
 def calculo_vector_antenna(corriente, distancia, theta):
-    """Calcula el vector de la antena"""
-    
+    """
+    Calcula la magnitud y la dirección (fase) del vector de la antena para un dipolo
+    y un ángulo theta (en grados).
+    """
     magnitud = corriente * fn(theta)
     angulo = b * distancia * cos_deg(theta)
+    return magnitud, angulo
 
-    return f"{magnitud} e^j {angulo}"
+datos = []  
 
-# # Ejemplo de uso:
-# parametros de la funcion: corriente , distancia , grados 
-#vector = calculo_vector_antenna(corriente[1], distancia[1], 10)
-#print(f"El resultado del vector es: {vector}"
-
-
-for i, dn in zip(corriente, distancia):
-    print(f"""
-------------------------------
--> corriente: {i}
--> distancia: {dn}""")
+for idx, (i, dn) in enumerate(zip(corriente, distancia), start=1):
+    print(f"------------------------------\nDipolo {idx}:\n-> Corriente: {i}\n-> Distancia: {dn}")
     for theta in angulos:
-        resultado = calculo_vector_antenna(i, dn, theta)
-        
-        print(f"""
-angulo: {theta}
-vector: {resultado} \n""")
+        magnitud, angulo = calculo_vector_antenna(i, dn, theta)
+        print(f"\nÁngulo: {theta}\nVector: {magnitud} e^ {angulo}")
+        datos.append({
+            "Dipolo": idx,
+            "Ángulo (grados)": theta,
+            "Magnitud": magnitud,
+            "Dirección": angulo
+        })
     print("------------------------------")
 
-    
+df = pd.DataFrame(datos, columns=["Dipolo", "Ángulo (grados)", "Magnitud", "Dirección"])
+
+nombre_archivo = "resultado_magnitud_direccion.xlsx"
+df.to_excel(nombre_archivo, index=False)
+
+print("\nArchivo Excel generado:", nombre_archivo)
